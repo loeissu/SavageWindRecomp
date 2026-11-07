@@ -257,15 +257,18 @@ static std::string check_copied_files(const std::string &root) {
         if (v) g_files_version = v->name;
         return v ? NOT_SUPPORTED_YET : NOT_SUPPORTED;
     }
-    if (!is_dir(root + "/romfs")) return "Game data missing";
-    if (!movies_complete(root + "/romfs")) return "Game files incomplete";
+    if (is_dir(root + "/romfs")) {
+        if (!movies_complete(root + "/romfs")) return "Game files incomplete";
+    } else if (!file_exists(root + "/romfs.bin")) {
+        return "Game data missing";  // (the packed image from an older setup is accepted too)
+    }
     return "";
 }
 
 // An older version's data image: the game reads the romfs/ folder itself now (runtime/romfs_image.h), 15 GB back
 static void remove_old_image(const std::string &root) {
-    if (file_exists(root + "/romfs.bin") && check_copied_files(root).empty() &&
-        rt_remove_game_file(root.c_str(), "romfs.bin"))
+    if (is_dir(root + "/romfs") && file_exists(root + "/romfs.bin") && check_copied_files(root).empty() &&
+        rt_remove_game_file(root.c_str(), "romfs.bin"))  // (only once a romfs/ folder is there: a packed image alone still works)
         fprintf(stderr, "[launcher] removed the old game data image (romfs.bin)\n");
 }
 
