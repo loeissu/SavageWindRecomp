@@ -176,7 +176,7 @@ extern "C" bool menu_input_captured(void) {
 // Esc opens the game's pause screen or backs out of a menu. F2 frees the mouse cursor; a click in the
 // window holds it again (runtime/hle/input.c).
 static bool overlay_enabled(void) {
-    static const bool on = getenv("SAVAGEWIND_OVERLAY") && *getenv("SAVAGEWIND_OVERLAY") != '0';
+    static const bool on = !getenv("SAVAGEWIND_OVERLAY") || *getenv("SAVAGEWIND_OVERLAY") != '0';  // (默认开启：否则 F1 菜单不可用)
     return on;
 }
 static std::atomic<bool> g_cursor_free{false};
